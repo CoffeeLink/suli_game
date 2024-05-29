@@ -17,8 +17,6 @@ class Entity {
     }
 
     has_components(component_types) {
-
-
         let has = false;
 
         for (let comp of component_types) {

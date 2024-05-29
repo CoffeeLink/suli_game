@@ -64,6 +64,13 @@
                     sys.run_system(this, this.resources, entities);
                 }
             }
+            for (let sys of this.systems) {
+                if (sys.on_event === Update) {
+                    let entities = this.get_matching(sys.required_components);
+                    sys.run_system(this, this.resources, entities);
+                }
+            }
+
         }
 
 
