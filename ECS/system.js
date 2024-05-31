@@ -1,20 +1,13 @@
 class System {
-    constructor(on_event = NeverEvent, required_components= [], required_resources= [], enabled= true) {
+    constructor(on_event = NeverEvent, query= [], enabled= true) {
 
-        for (let comp of required_components) {
+        for (let comp of query) {
             if (!comp instanceof Component) {
-                throw new Error("required_components must be an array of Component classes");
+                throw new Error("query must be an array of Component classes");
             }
         }
 
-        for (let res of required_resources) {
-            if (!res instanceof Resource) {
-                throw new Error("required_resources must be an array of Resource classes");
-            }
-        }
-
-        this.required_components = required_components;
-        this.required_resources = required_resources;
+        this.required_components = query;
 
         this.on_event = on_event;
         this.enabled = enabled;

@@ -1,77 +1,93 @@
-    class EcsApp {
-        constructor() {
-            // Holds all entities
-            this.entities = [];
+class EcsApp {
+    constructor(frame_rate = 60) {
+        // Holds all entities
+        this.entities = [];
 
-            // Holds all systems (class)
-            this.systems = [];
-            this.resources = [];
-            this.event_types = [Startup, Update];
+        // Holds all systems (class)
+        this.systems = [];
 
-            this.last_entity_id = 0;
+        this.target_frame_rate = frame_rate;
 
-        }
-
-        // creates a new entity and adds the given components to it
-        spawn(...components) {
-            let entity = new Entity(this.last_entity_id++);
-            for (let component of components) {
-                entity.add_component(component);
-            }
-            this.entities.push(entity);
-            return entity;
-        }
-
-        delete_entity(entity) {
-            let index = this.entities.indexOf(entity);
-            if (index > -1) {
-                this.entities.splice(index, 1);
-            }
-        }
-
-        add_resource(resource) {
-            if (!resource instanceof Resource) {
-                throw new Error("Resource must be an instance of Resource");
-            }
-            this.resources.push(resource);
-        }
-        // no function to remove a resource cuz those cant be removed
-
-        add_system(event, system) {
-            if (!system instanceof System) {
-                throw "nah"
-            }
-
-            system.on_event = event;
-            this.systems.push(system)
-        }
-
-        get_matching(required_comps) {
-            let ents = [];
-            for (let entity of this.entities) {
-                if (entity.has_components(required_comps)) {
-                    ents.push(entity);
-                }
-            }
-
-            return ents;
-        }
-
-        run() {
-            for (let sys of this.systems) {
-                if (sys.on_event === Startup) {
-                    let entities = this.get_matching(sys.required_components);
-                    sys.run_system(this, this.resources, entities);
-                }
-            }
-            for (let sys of this.systems) {
-                if (sys.on_event === Update) {
-                    let entities = this.get_matching(sys.required_components);
-                    sys.run_system(this, this.resources, entities);
-                }
-            }
-
-        }
-
+        this.resources = new Map();
+        this.last_entity_id = 0;
 
     }
+
+    // creates a new entity and adds the given components to it
+    spawn(...components) {
+        let entity = new Entity(this.last_entity_id++);
+        for (let component of components) {
+            entity.add_component(component);
+        }
+        this.entities.push(entity);
+        return entity;
+    }
+
+    delete_entity(entity) {
+        let index = this.entities.indexOf(entity);
+        if (index > -1) {
+            this.entities.splice(index, 1);
+        }
+    }
+
+    add_resource(key, resource) {
+        if (!resource instanceof Resource) {
+            throw new Error("Resource must be an instance of Resource");
+        }
+
+        if (this.resources.has(resource.constructor)) {
+            throw new Error("Resource already added");
+        }
+
+        this.resources.set(key, resource)
+    }
+    // no function to remove a resource cuz those cant be removed
+
+    add_system(event, system) {
+        if (!system instanceof System) {
+            throw "Attempting to add " + system.constructor.name + " as a System"
+        }
+
+        system.on_event = event;
+        this.systems.push(system)
+    }
+
+    get_matching(required_comps) {
+        let ents = [];
+        for (let entity of this.entities) {
+            if (entity.has_components(required_comps)) {
+                ents.push(entity);
+            }
+        }
+
+        return ents;
+    }
+
+    run() {
+        this.add_resource(TimeResource, new TimeResource()); // Time should be core
+        this.run_systems(Startup);
+
+        setInterval(() => this.update_run(this), 1000 / this.target_frame_rate)
+    }
+
+    update_run(ecs) {
+        ecs.run_systems(FrameStart);
+
+        ecs.run_systems(PreUpdate);
+        ecs.run_systems(Update);
+        ecs.run_systems(PostUpdate);
+
+        ecs.run_systems(PreRender);
+        ecs.run_systems(Render);
+
+        ecs.run_systems(FrameEnd);
+    }
+
+    run_systems(event_type) {
+        let matching = this.systems.filter(sys => sys.on_event === event_type);
+        for (let sys of matching) {
+            let entities = this.get_matching(sys.required_components);
+            sys.run_system(this, this.resources, entities);
+        }
+    }
+}

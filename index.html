@@ -11,12 +11,28 @@
     <script src="ECS/resource.js"></script>
     <script src="ECS/system.js"></script>
 
-    <script src="ECS/Events/event.js"></script>
-    <script src="ECS/Events/never.js"></script>
-    <script src="ECS/Events/startup.js"></script>
-    <script src="ECS/Events/update.js"></script>
+    <script src="ECS/events_core.js"></script>
+
+    <script src="resources/resources_core.js"></script>
+    <script src="components/components_core.js"></script>
+    <script src="systems/systems_core.js"></script>
+
 </head>
+
+<style>
+    html {
+        background-color: darkslateblue;
+    }
+
+    canvas {
+        align-self: center;
+    }
+</style>
+
 <body>
-    <canvas id="canvas" height="400" width="400"></canvas>
+    <canvas id="canvas" height="800" width="800"></canvas>
 </body>
+
+<img id="test_image" src="/assets/kutya_1.png" alt="" style="visibility: hidden">
+
 </html>

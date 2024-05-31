@@ -1,3 +1,1 @@
-class Resource {
-    constructor() {}
-}
+class Resource {} // just a class acting like a trait for resources
