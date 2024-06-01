@@ -17,32 +17,12 @@ let app = new EcsApp(60);
 app.add_resource(CanvasResource, new CanvasResource(canvas))
 app.add_resource(InputResource, input_res);
 
-const image = document.getElementById("test_image");
+const dog_img = document.getElementById("dog0_img");
+const cat0_img = document.getElementById("cat0_img");
 
 
-class Sprite extends ComponentGroup {
-    constructor(x, y, texture, ox = 0, oy = 0, layer = 0, w = 0, h = 0) {
-        super();
-
-        this.x = x;
-        this.y = y;
-        this.texture = texture;
-
-        this.ox = ox;
-        this.oy = oy;
-        this.layer = layer;
-
-        this.w = w;
-        this.h = h;
-    }
-    build(entity) {
-        entity.add_component(new Transform(this.x, this.y));
-        entity.add_component(new Sprite2D(this.texture, this.ox, this.oy, this.layer));
-        entity.add_component(new Collider2D(this.w, this.h));
-    }
-}
-
-let dog_components = new Sprite(0, 0, image, -16, -26, 0, 115, 80);
+let dog_components = new Sprite(0, 0, dog_img, -16, -26, 0, 115, 80);
+let cat_components = new Sprite(250, 716, cat0_img, -21, -20, 1, 104, 85);
 
 class StartSystem extends System {
     constructor() {
@@ -52,9 +32,11 @@ class StartSystem extends System {
     run_system(commands, resources, matched_entities) {
         commands.spawn(dog_components).get_comp(Transform).x = 100;
         commands.spawn(dog_components).get_comp(Transform).x = 220;
-        commands.spawn(dog_components, new Player);
+        commands.spawn(dog_components);
         commands.spawn(dog_components).get_comp(Transform).x = 340;
         commands.spawn(dog_components).get_comp(Transform).x = 460;
+
+        commands.spawn(cat_components, new Player);
 
     }
 }
@@ -72,17 +54,11 @@ class PlayerMovement extends System {
         const time = resources.get(TimeResource);
         for (let entity of matched_entities) {
             let pos = entity.get_comp(Transform);
-            if (input_res.is_down("w")) {
-                pos.y -= 100 * time.delta_time / 1000;
-            }
-            if (input_res.is_down("s")) {
-                pos.y += 100 * time.delta_time / 1000;
-            }
             if (input_res.is_down("a")) {
-                pos.x -= 100 * time.delta_time / 1000;
+                pos.x -= 200 * time.delta_time / 1000;
             }
             if (input_res.is_down("d")) {
-                pos.x += 100 * time.delta_time / 1000;
+                pos.x += 200 * time.delta_time / 1000;
             }
         }
     }
@@ -96,7 +72,6 @@ app.add_system(Update, new PlayerMovement)
 app.run()
 
 // TODO:
-//  - EntityGroups (almost scenes)
 //  - Scene Manager
 //  - UI,
 //  - GameStateManager (Resource and System)
