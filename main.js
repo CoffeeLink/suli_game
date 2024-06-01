@@ -19,17 +19,42 @@ app.add_resource(InputResource, input_res);
 
 const image = document.getElementById("test_image");
 
+
+class Sprite extends ComponentGroup {
+    constructor(x, y, texture, ox = 0, oy = 0, layer = 0, w = 0, h = 0) {
+        super();
+
+        this.x = x;
+        this.y = y;
+        this.texture = texture;
+
+        this.ox = ox;
+        this.oy = oy;
+        this.layer = layer;
+
+        this.w = w;
+        this.h = h;
+    }
+    build(entity) {
+        entity.add_component(new Transform(this.x, this.y));
+        entity.add_component(new Sprite2D(this.texture, this.ox, this.oy, this.layer));
+        entity.add_component(new Collider2D(this.w, this.h));
+    }
+}
+
+let dog_components = new Sprite(0, 0, image, -16, -26, 0, 115, 80);
+
 class StartSystem extends System {
     constructor() {
         super();
         this.needs_entities = false;
     }
     run_system(commands, resources, matched_entities) {
-        commands.spawn(new Transform(0, 100), new Sprite2D(image, -16, -26));
-        commands.spawn(new Transform(20, 200), new Sprite2D(image, -16, -26));
-        commands.spawn(new Transform(20, 10), new Sprite2D(image, -16, -26, 1), new Player, new Collider2D(115, 80));
-        commands.spawn(new Transform(100, 0), new Sprite2D(image, -16, -26), new Collider2D(115, 80));
-        commands.spawn(new Transform(200, 200), new Sprite2D(image, -16, -26));
+        commands.spawn(dog_components).get_comp(Transform).x = 100;
+        commands.spawn(dog_components).get_comp(Transform).x = 220;
+        commands.spawn(dog_components, new Player);
+        commands.spawn(dog_components).get_comp(Transform).x = 340;
+        commands.spawn(dog_components).get_comp(Transform).x = 460;
 
     }
 }
@@ -71,7 +96,6 @@ app.add_system(Update, new PlayerMovement)
 app.run()
 
 // TODO:
-//  - ComponentGroups
 //  - EntityGroups (almost scenes)
 //  - Scene Manager
 //  - UI,

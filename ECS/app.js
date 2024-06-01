@@ -16,7 +16,11 @@ class EcsApp {
     spawn(...components) {
         let entity = new Entity(this.last_entity_id++);
         for (let component of components) {
-            entity.add_component(component);
+            if (component instanceof ComponentGroup) {
+                component.build(entity);
+            } else {
+                entity.add_component(component);
+            }
         }
         this.entities.push(entity);
         return entity;

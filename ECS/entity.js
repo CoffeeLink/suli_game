@@ -5,8 +5,9 @@ class Entity {
     }
 
     add_component(component) {
-        if (!(component instanceof Component)) {
-            throw new Error("Invalid component type")
+        if (component instanceof ComponentGroup) {
+            component.build(this);
+            return;
         }
 
         if (this.components.filter(comp => comp.constructor.name === component.constructor.name).length > 0) {
