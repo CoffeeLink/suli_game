@@ -49,6 +49,14 @@ class EcsApp {
 
         system.on_event = event;
         this.systems.push(system)
+        return system;
+    }
+
+    add_system_group(system_group) {
+        if (!system_group instanceof SystemGroup) {
+            throw new Error("Attempted to add something thats not a system group as a system group")
+        }
+        system_group.build(this);
     }
 
     get_matching(required_comps) {

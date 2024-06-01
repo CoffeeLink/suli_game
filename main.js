@@ -64,21 +64,16 @@ class PlayerMovement extends System {
 }
 
 // add systems
-app.add_system(FrameStart, new TimeUpdateSystem());
-
+app.add_system_group(new CoreSystemGroup);
 app.add_system(Startup, new StartSystem);
-
-app.add_system(PreUpdate, new RenderPreClear);
-app.add_system(PreUpdate, new InputUpdaterSystem);
-app.add_system(Update, new Collider2dSystem);
-app.add_system(Update, new PlayerMovement);
-
-app.add_system(Render, new Sprite2dRenderer);
+app.add_system(Update, new PlayerMovement)
 
 app.run()
 
 // TODO:
+//  - ComponentGroups
+//  - EntityGroups (almost scenes)
+//  - Scene Manager
 //  - UI,
-//  - Scenes,
-//  - Sound?,
-//  - score,
+//  - GameStateManager (Resource and System)
+//  - Sound?

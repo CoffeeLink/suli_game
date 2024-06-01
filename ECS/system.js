@@ -25,3 +25,23 @@ class System {
         this.enabled = false;
     }
 }
+
+class SystemGroup {
+    constructor() {
+        this.systems = [];
+    }
+    add_system(commands, event, system) {
+        this.systems.push(commands.add_system(event, system));
+    }
+    build(commands) {}
+    enable() {
+        for (let system of this.systems) {
+            system.enabled = true;
+        }
+    }
+    disable() {
+        for (let system of this.systems) {
+            system.enabled = false;
+        }
+    }
+}

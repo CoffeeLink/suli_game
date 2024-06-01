@@ -102,11 +102,13 @@ class Collider2dSystem extends System {
             let col = entity.get_comp(Collider2D);
 
             // draw rect
-            let ctx = resources.get(CanvasResource).context;
-            ctx.beginPath();
-            ctx.rect(pos.x, pos.y, col.width, col.height);
-            ctx.stroke();
 
+            if (col.draw) {
+                let ctx = resources.get(CanvasResource).context;
+                ctx.beginPath();
+                ctx.rect(pos.x, pos.y, col.width, col.height);
+                ctx.stroke();
+            }
             col.colliding_with.clear();
 
             for (let other of matched_entities) {
@@ -124,5 +126,16 @@ class Collider2dSystem extends System {
                 }
             }
         }
+    }
+}
+
+// holds all systems core to the engine.
+class CoreSystemGroup extends SystemGroup {
+    build(commands) {
+        this.add_system(commands, FrameStart, new TimeUpdateSystem);
+        this.add_system(commands, FrameStart, new InputUpdaterSystem);
+        this.add_system(commands, PreUpdate, new RenderPreClear);
+        this.add_system(commands, Update, new Collider2dSystem);
+        this.add_system(commands, Render, new Sprite2dRenderer);
     }
 }
