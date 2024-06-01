@@ -12,6 +12,19 @@ class Sprite2dRenderer extends System {
         }
 
         let canvas_resource = this.canvas_res.context;
+
+        matched_entities = matched_entities.sort((a, b) => {
+            let a_sprite = a.get_comp(Sprite2D);
+            let b_sprite = b.get_comp(Sprite2D);
+            if (a_sprite.layer > b_sprite.layer) {
+                return 1;
+            } else if (a_sprite.layer === b_sprite.layer) {
+                return 0;
+            } else {
+                return -1;
+            }
+        })
+
         for (let entity of matched_entities) {
             let pos = entity.get_comp(Transform);
             let rend = entity.get_comp(Sprite2D);
@@ -25,6 +38,7 @@ class RenderPreClear extends System {
     constructor() {
         super();
         this.required_components = [];
+        this.needs_entities = false;
         this.on_event = PreRender;
 
         // cache canvas
@@ -73,8 +87,42 @@ class TimeUpdateSystem extends System {
         time.delta_time = now - time.last_timestamp;
         time.frame_rate = 1000 / time.delta_time;
         time.last_timestamp = now;
+    }
+}
 
+class Collider2dSystem extends System {
+    constructor() {
+        super();
+        this.required_components = [Transform, Collider2D];
+    }
 
-        console.log("Frame rate: " + Math.round(time.frame_rate));
+    run_system(commands, resources, matched_entities) {
+        for (let entity of matched_entities) {
+            let pos = entity.get_comp(Transform);
+            let col = entity.get_comp(Collider2D);
+
+            // draw rect
+            let ctx = resources.get(CanvasResource).context;
+            ctx.beginPath();
+            ctx.rect(pos.x, pos.y, col.width, col.height);
+            ctx.stroke();
+
+            col.colliding_with.clear();
+
+            for (let other of matched_entities) {
+                if (entity.id === other.id) continue;
+
+                let other_pos = other.get_comp(Transform);
+                let other_col = other.get_comp(Collider2D);
+
+                if (pos.x < other_pos.x + other_col.width &&
+                    pos.x + col.width > other_pos.x &&
+                    pos.y < other_pos.y + other_col.height &&
+                    pos.y + col.height > other_pos.y) {
+
+                    col.colliding_with.add(other);
+                }
+            }
+        }
     }
 }

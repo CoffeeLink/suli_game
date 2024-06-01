@@ -10,7 +10,6 @@ class EcsApp {
 
         this.resources = new Map();
         this.last_entity_id = 0;
-
     }
 
     // creates a new entity and adds the given components to it
@@ -84,9 +83,14 @@ class EcsApp {
     }
 
     run_systems(event_type) {
-        let matching = this.systems.filter(sys => sys.on_event === event_type);
+        let matching = this.systems.filter(sys => sys.on_event === event_type && sys.enabled === true);
         for (let sys of matching) {
-            let entities = this.get_matching(sys.required_components);
+            // no entities req if false
+            let entities = [];
+            if (sys.needs_entities) {
+                entities = this.get_matching(sys.required_components);
+            }
+
             sys.run_system(this, this.resources, entities);
         }
     }

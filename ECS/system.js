@@ -8,6 +8,7 @@ class System {
         }
 
         this.required_components = query;
+        this.needs_entities = true;
 
         this.on_event = on_event;
         this.enabled = enabled;

@@ -13,7 +13,20 @@ class InputResource extends Resource {
         this.keys_pressed_before_update_cyle = new Set();
 
         // Holds all "registered" key presses.
-        this.keys_pressed = new Set();
+        this.keys_down_last_frame = new Set
+        this.keys_down = new Set();
+    }
+
+    is_down(key) {
+        return this.keys_down.has(key);
+    }
+
+    is_up(key) {
+        return !this.keys_down.has(key);
+    }
+
+    is_pressed(key) {
+        return (!this.keys_down_last_frame.has(key) && this.keys_down.has(key));
     }
 
     on_key_down(key) {
@@ -25,7 +38,8 @@ class InputResource extends Resource {
     }
 
     update_keys() {
-        this.keys_pressed = new Set(this.keys_pressed_before_update_cyle);
+        this.keys_down_last_frame = this.keys_down;
+        this.keys_down = new Set(this.keys_pressed_before_update_cyle);
     }
 }
 
