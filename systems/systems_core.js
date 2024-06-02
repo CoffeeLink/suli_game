@@ -137,7 +137,7 @@ class UIInteractions extends System {
     constructor() {
         super();
 
-        this.required_components = [Sprite2D, UIElement];
+        this.required_components = [UIElement];
         this.needs_entities = true;
     }
 
@@ -155,41 +155,48 @@ class UIInteractions extends System {
 
         let input_res = resources.get(InputResource)
         let selected_uie = selected.get_comp(UIElement);
-        let selected_sprite = selected.get_comp(Sprite2D);
 
         if (input_res.is_pressed("ArrowUp") && selected_uie.above !== null) {
             selected_uie.selected = false;
-            selected_sprite.texture = selected_uie.deselected_texture.texture;
+            selected_uie.deselected_func(selected);
 
-            selected_uie.above.get_comp(UIElement).selected = true;
-            selected_uie.above.get_comp(Sprite2D).texture = selected_uie.above.get_comp(UIElement).selected_texture.texture;
+            let ent = selected_uie.above;
+            let uie = ent.get_comp(UIElement);
+            uie.selected = true;
+            uie.selected_func(ent);
 
             console.log("current selected: " + selected_uie.above.id);
 
         } else if (input_res.is_pressed("ArrowDown") && selected_uie.under !== null) {
             selected_uie.selected = false;
-            selected_sprite.texture = selected_uie.deselected_texture.texture;
+            selected_uie.deselected_func(selected);
 
-            selected_uie.under.get_comp(UIElement).selected = true;
-            selected_uie.under.get_comp(Sprite2D).texture = selected_uie.under.get_comp(UIElement).selected_texture.texture;
+            let ent = selected_uie.under;
+            let uie = ent.get_comp(UIElement);
+            uie.selected = true;
+            uie.selected_func(ent);
 
             console.log("current selected: " + selected_uie.under.id);
 
         } else if (input_res.is_pressed("ArrowLeft") && selected_uie.left !== null) {
             selected_uie.selected = false;
-            selected_sprite.texture = selected_uie.deselected_texture.texture;
+            selected_uie.deselected_func(selected);
 
-            selected_uie.left.get_comp(UIElement).selected = true;
-            selected_uie.left.get_comp(Sprite2D).texture = selected_uie.left.get_comp(UIElement).selected_texture.texture;
+            let ent = selected_uie.left;
+            let uie = ent.get_comp(UIElement);
+            uie.selected = true;
+            uie.selected_func(ent);
 
             console.log("current selected: " + selected_uie.left.id);
 
         } else if (input_res.is_pressed("ArrowRight") && selected_uie.right !== null) {
             selected_uie.selected = false;
-            selected_sprite.texture = selected_uie.deselected_texture.texture;
+            selected_uie.deselected_func(selected);
 
-            selected_uie.right.get_comp(UIElement).selected = true;
-            selected_uie.right.get_comp(Sprite2D).texture = selected_uie.right.get_comp(UIElement).selected_texture.texture;
+            let ent = selected_uie.right;
+            let uie = ent.get_comp(UIElement);
+            uie.selected = true;
+            uie.selected_func(ent);
 
             console.log("current selected: " + selected_uie.right.id);
 

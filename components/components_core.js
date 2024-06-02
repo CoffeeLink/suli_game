@@ -32,11 +32,11 @@ class Collider2D extends Component {
 }
 
 class UIElement extends Component {
-    constructor(selected_texture, deselected_texture) {
+    constructor(selected_func, deselected_func) {
         super();
 
-        this.selected_texture = selected_texture; // components btw
-        this.deselected_texture = deselected_texture;
+        this.selected_func = selected_func; // components btw
+        this.deselected_func = deselected_func;
 
         this.selected = false;
 
