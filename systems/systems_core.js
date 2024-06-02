@@ -29,6 +29,10 @@ class Sprite2dRenderer extends System {
             let pos = entity.get_comp(Transform);
             let rend = entity.get_comp(Sprite2D);
 
+            if (!rend.visable) {
+                continue;
+            }
+
             canvas_resource.drawImage(rend.texture, pos.x + rend.offset_x, pos.y + rend.offset_y);
         }
     }
@@ -129,12 +133,77 @@ class Collider2dSystem extends System {
     }
 }
 
+class UIInteractions extends System {
+    constructor() {
+        super();
+
+        this.required_components = [Sprite2D, UIElement];
+        this.needs_entities = true;
+    }
+
+    run_system(commands, resources, matched_entities) {
+        if (!matched_entities) {
+            return;
+        }
+        let selected = matched_entities.find((element) => {
+            return element.get_comp(UIElement).selected;
+        })
+
+        if (!selected) {
+            return;
+        }
+
+        let input_res = resources.get(InputResource)
+        let selected_uie = selected.get_comp(UIElement);
+        let selected_sprite = selected.get_comp(Sprite2D);
+
+        if (input_res.is_pressed("ArrowUp") && selected_uie.above !== null) {
+            selected_uie.selected = false;
+            selected_sprite.texture = selected_uie.deselected_texture.texture;
+
+            selected_uie.above.get_comp(UIElement).selected = true;
+            selected_uie.above.get_comp(Sprite2D).texture = selected_uie.above.get_comp(UIElement).selected_texture.texture;
+
+            console.log("current selected: " + selected_uie.above.id);
+
+        } else if (input_res.is_pressed("ArrowDown") && selected_uie.under !== null) {
+            selected_uie.selected = false;
+            selected_sprite.texture = selected_uie.deselected_texture.texture;
+
+            selected_uie.under.get_comp(UIElement).selected = true;
+            selected_uie.under.get_comp(Sprite2D).texture = selected_uie.under.get_comp(UIElement).selected_texture.texture;
+
+            console.log("current selected: " + selected_uie.under.id);
+
+        } else if (input_res.is_pressed("ArrowLeft") && selected_uie.left !== null) {
+            selected_uie.selected = false;
+            selected_sprite.texture = selected_uie.deselected_texture.texture;
+
+            selected_uie.left.get_comp(UIElement).selected = true;
+            selected_uie.left.get_comp(Sprite2D).texture = selected_uie.left.get_comp(UIElement).selected_texture.texture;
+
+            console.log("current selected: " + selected_uie.left.id);
+
+        } else if (input_res.is_pressed("ArrowRight") && selected_uie.right !== null) {
+            selected_uie.selected = false;
+            selected_sprite.texture = selected_uie.deselected_texture.texture;
+
+            selected_uie.right.get_comp(UIElement).selected = true;
+            selected_uie.right.get_comp(Sprite2D).texture = selected_uie.right.get_comp(UIElement).selected_texture.texture;
+
+            console.log("current selected: " + selected_uie.right.id);
+
+        }
+    }
+}
+
 // holds all systems core to the engine.
 class CoreSystemGroup extends SystemGroup {
     build(commands) {
         this.add_system(commands, FrameStart, new TimeUpdateSystem);
         this.add_system(commands, FrameStart, new InputUpdaterSystem);
         this.add_system(commands, PreUpdate, new RenderPreClear);
+        this.add_system(commands, Update, new UIInteractions)
         this.add_system(commands, Update, new Collider2dSystem);
         this.add_system(commands, Render, new Sprite2dRenderer);
     }

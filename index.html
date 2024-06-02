@@ -21,20 +21,31 @@
 </head>
 
 <style>
-    html {
-        background-color: darkslateblue;
+
+    @font-face {
+        font-family: MinecraftFont;
+        src: url("/assets/MinecraftRegular-Bmg3.otf");
+        font-weight: normal;
+        font-style: normal;
     }
 
-    .container {
-        display: flex;
-        justify-content: center;
+    html {
+        background-color: darkslateblue;
+
+        background-image: url("/assets/hatter.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-position-y: -75px;
+
+        overflow: hidden;
     }
 
     canvas {
-        margin-left: auto;
-        margin-right: auto;
         display: block;
-        border: 1px solid black;
+        border: 6px solid black;
+        border-radius: 10px;
+        margin: auto;
     }
 </style>
 
@@ -44,5 +55,7 @@
 
 <img id="dog0_img" src="/assets/kutya_1.png" alt="" style="visibility: hidden">
 <img id="cat0_img" src="assets/kismacska.png" alt="" style="visibility: hidden">
+<img id="cat_food" src="assets/macskakaja.png" alt="" style="visibility: hidden">
+<img id="dog_food" src="assets/csont.png" alt="" style="visibility: hidden">
 
 </html>

@@ -19,7 +19,8 @@ app.add_resource(InputResource, input_res);
 
 const dog_img = document.getElementById("dog0_img");
 const cat0_img = document.getElementById("cat0_img");
-
+const cat_food = document.getElementById("cat_food");
+const dog_food = document.getElementById("dog_food");
 
 let dog_components = new Sprite(0, 0, dog_img, -16, -26, 0, 115, 80);
 let cat_components = new Sprite(250, 716, cat0_img, -21, -20, 1, 104, 85);
@@ -37,7 +38,6 @@ class StartSystem extends System {
         commands.spawn(dog_components).get_comp(Transform).x = 460;
 
         commands.spawn(cat_components, new Player);
-
     }
 }
 class Player extends Component {}
@@ -72,7 +72,7 @@ app.add_system(Update, new PlayerMovement)
 app.run()
 
 // TODO:
-//  - Scene Manager
+//  - Scene Manager,
 //  - UI,
-//  - GameStateManager (Resource and System)
+//  - GameStateManager (Resource and System),
 //  - Sound?

@@ -15,6 +15,8 @@ class Sprite2D extends Component {
         this.offset_x = offset_x;
         this.offset_y = offset_y;
         this.layer = layer;
+
+        this.visable = true;
     }
 }
 
@@ -26,5 +28,21 @@ class Collider2D extends Component {
         this.draw = draw;
 
         this.colliding_with = new Set(); // Stores all entities that this entity is colliding with.
+    }
+}
+
+class UIElement extends Component {
+    constructor(selected_texture, deselected_texture) {
+        super();
+
+        this.selected_texture = selected_texture; // components btw
+        this.deselected_texture = deselected_texture;
+
+        this.selected = false;
+
+        this.above = null;
+        this.under = null;
+        this.left = null;
+        this.right = null;
     }
 }

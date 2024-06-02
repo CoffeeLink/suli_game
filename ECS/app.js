@@ -6,10 +6,16 @@ class EcsApp {
         // Holds all systems (class)
         this.systems = [];
 
+        // The default event schedule
+        this.event_schedule = [FrameStart, PreUpdate, Update, PostUpdate, PreRender, Render, FrameEnd];
+        this.event_queue = [];
+
         this.target_frame_rate = frame_rate;
 
         this.resources = new Map();
         this.last_entity_id = 0;
+
+        this.update_interval_id = null;
     }
 
     // creates a new entity and adds the given components to it
@@ -78,7 +84,31 @@ class EcsApp {
         this.add_resource(TimeResource, new TimeResource()); // Time should be core
         this.run_systems(Startup);
 
-        setInterval(() => this.update_run(this), 1000 / this.target_frame_rate)
+        this.update_interval_id = setInterval(() => this.update_run(this), 1000 / this.target_frame_rate)
+    }
+
+    change_target_frame_rate(frame_rate) {
+        clearInterval(this.update_interval_id);
+        this.update_interval_id = setInterval(() => this.update_run(this), 1000 / frame_rate);
+        this.target_frame_rate = frame_rate;
+    }
+
+    queue_event(event) {
+        this.event_queue.push(event);
+    }
+
+    add_event_before(other_event, event) {
+        let index = this.event_schedule.indexOf(other_event);
+        if (index && index !== -1) {
+            this.event_schedule.splice(index, 0, event);
+        }
+    }
+
+    add_event_after(other_event, event) {
+        let index = this.event_schedule.indexOf(other_event);
+        if (index && index !== -1) {
+            this.event_schedule.splice(index + 1, 0, event);
+        }
     }
 
     update_run(ecs) {
