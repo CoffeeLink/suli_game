@@ -12,7 +12,9 @@ document.addEventListener('keyup', (event) => {
     event = event || window.event;
     input_res.on_key_up(event.key);
 })
+
 let app = new EcsApp(60);
+
 // add resources
 app.add_resource(CanvasResource, new CanvasResource(canvas))
 app.add_resource(InputResource, input_res);
@@ -72,7 +74,5 @@ app.add_system(Update, new PlayerMovement)
 app.run()
 
 // TODO:
-//  - Scene Manager,
-//  - UI,
-//  - GameStateManager (Resource and System),
-//  - Sound?
+//  - GameStateManager (Resource and System)
+//  - Sound?,

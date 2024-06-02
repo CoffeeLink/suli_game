@@ -1,7 +1,8 @@
 class Entity {
-    constructor(id) {
+    constructor(id, scene_id) {
         this.id = id;
-        this.components = []
+        this.scene_id = scene_id;
+        this.components = [];
     }
 
     add_component(component) {

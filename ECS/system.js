@@ -12,6 +12,8 @@ class System {
 
         this.on_event = on_event;
         this.enabled = enabled;
+
+        this.only_takes_active_scene_entities = false;
     }
 
     run_system(commands, resources, matched_entities){

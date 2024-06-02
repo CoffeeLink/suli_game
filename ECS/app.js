@@ -16,11 +16,15 @@ class EcsApp {
         this.last_entity_id = 0;
 
         this.update_interval_id = null;
+
+        this.scenes = [0];
+        this.current_scene = 0;
+        this.last_scene_id = 0;
     }
 
     // creates a new entity and adds the given components to it
     spawn(...components) {
-        let entity = new Entity(this.last_entity_id++);
+        let entity = new Entity(this.last_entity_id++, this.current_scene);
         for (let component of components) {
             if (component instanceof ComponentGroup) {
                 component.build(entity);
@@ -30,6 +34,30 @@ class EcsApp {
         }
         this.entities.push(entity);
         return entity;
+    }
+
+    spawn_on_scene(scene_id, ...components) {
+        let entity = new Entity(this.last_entity_id++, scene_id);
+        for (let component of components) {
+            if (component instanceof ComponentGroup) {
+                component.build(entity);
+            } else {
+                entity.add_component(component);
+            }
+        }
+        this.entities.push(entity);
+        return entity;
+    }
+
+    // creates a new scene id and adds it to the list of scenes, then returns it;
+    new_scene() {
+        let id = this.last_scene_id += 1;
+        this.scenes.push(id);
+        return id;
+    }
+
+    set_scene(id) {
+        this.current_scene = id;
     }
 
     delete_entity(entity) {
@@ -64,20 +92,21 @@ class EcsApp {
 
     add_system_group(system_group) {
         if (!system_group instanceof SystemGroup) {
-            throw new Error("Attempted to add something thats not a system group as a system group")
+            throw new Error("Attempted to add something that's not a system group as a system group")
         }
         system_group.build(this);
     }
 
     get_matching(required_comps) {
-        let ents = [];
-        for (let entity of this.entities) {
-            if (entity.has_components(required_comps)) {
-                ents.push(entity);
-            }
-        }
+        return this.entities.filter((entity) => {
+            return entity.has_components(required_comps);
+        })
+    }
 
-        return ents;
+    get_matching_scene_only(required_comps) {
+        return this.entities.filter((entity) => {
+            return entity.scene_id === this.current_scene && entity.has_components(required_comps);
+        })
     }
 
     run() {
@@ -112,16 +141,9 @@ class EcsApp {
     }
 
     update_run(ecs) {
-        ecs.run_systems(FrameStart);
-
-        ecs.run_systems(PreUpdate);
-        ecs.run_systems(Update);
-        ecs.run_systems(PostUpdate);
-
-        ecs.run_systems(PreRender);
-        ecs.run_systems(Render);
-
-        ecs.run_systems(FrameEnd);
+        for (let event of ecs.event_schedule) {
+            ecs.run_systems(event);
+        }
     }
 
     run_systems(event_type) {
@@ -129,7 +151,9 @@ class EcsApp {
         for (let sys of matching) {
             // no entities req if false
             let entities = [];
-            if (sys.needs_entities) {
+            if (sys.needs_entities && sys.only_takes_active_scene_entities) {
+                entities = this.get_matching_scene_only(sys.required_components);
+            } else if (sys.needs_entities) {
                 entities = this.get_matching(sys.required_components);
             }
 
