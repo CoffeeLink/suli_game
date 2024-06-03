@@ -159,6 +159,10 @@ class UIInteractions extends System {
         let input_res = resources.get(InputResource)
         let selected_uie = selected.get_comp(UIElement);
 
+        if (input_res.is_pressed("Enter")) {
+            selected_uie.on_use_func(selected);
+        }
+
         if (input_res.is_pressed("ArrowUp") && selected_uie.above !== null) {
             selected_uie.selected = false;
             selected_uie.deselected_func(selected);
