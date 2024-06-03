@@ -4,6 +4,8 @@ class Sprite2dRenderer extends System {
         this.required_components = [Transform, Sprite2D];
         this.on_event = Render;
 
+        this.only_takes_active_scene_entities = true;
+
         this.canvas_res = null;
     }
     run_system(commands, resources, matched_entities) {
@@ -98,6 +100,7 @@ class Collider2dSystem extends System {
     constructor() {
         super();
         this.required_components = [Transform, Collider2D];
+        this.only_takes_active_scene_entities = true;
     }
 
     run_system(commands, resources, matched_entities) {
@@ -138,7 +141,7 @@ class UIInteractions extends System {
         super();
 
         this.required_components = [UIElement];
-        this.needs_entities = true;
+        this.only_takes_active_scene_entities = true;
     }
 
     run_system(commands, resources, matched_entities) {
@@ -199,7 +202,33 @@ class UIInteractions extends System {
             uie.selected_func(ent);
 
             console.log("current selected: " + selected_uie.right.id);
+        }
+    }
+}
 
+class TextUIRenderer extends System {
+    constructor() {
+        super();
+
+        this.required_components = [Transform, UIText];
+        this.only_takes_active_scene_entities = true;
+
+        this.canvas_res = null;
+    }
+
+    run_system(commands, resources, matched_entities) {
+        if (this.canvas_res === null) {
+            this.canvas_res = resources.get(CanvasResource);
+        }
+
+        let ctx = this.canvas_res.context;
+        for (let entity of matched_entities) {
+            let pos = entity.get_comp(Transform);
+            let text = entity.get_comp(UIText);
+
+            ctx.font = text.size + "px MinecraftFont";
+            ctx.fillStyle = text.color || "black";
+            ctx.fillText(text.text, pos.x + text.offset_x, pos.y + text.offset_y);
         }
     }
 }
@@ -213,5 +242,6 @@ class CoreSystemGroup extends SystemGroup {
         this.add_system(commands, Update, new UIInteractions)
         this.add_system(commands, Update, new Collider2dSystem);
         this.add_system(commands, Render, new Sprite2dRenderer);
+        this.add_system(commands, Render, new TextUIRenderer);
     }
 }

@@ -46,3 +46,15 @@ class UIElement extends Component {
         this.right = null;
     }
 }
+
+class UIText extends Component {
+    constructor(text, size = 48, color = "black",offset_x = 0, offset_y = 0) {
+        super();
+
+        this.text = text;
+        this.size = size;
+        this.offset_x = offset_x;
+        this.offset_y = offset_y;
+        this.color = color;
+    }
+}

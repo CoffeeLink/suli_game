@@ -90,6 +90,10 @@ class EcsApp {
         return system;
     }
 
+    get_system(system) {
+        return this.systems.find((sys) => {return sys instanceof system})
+    }
+
     add_system_group(system_group) {
         if (!system_group instanceof SystemGroup) {
             throw new Error("Attempted to add something that's not a system group as a system group")

@@ -19,6 +19,13 @@ let app = new EcsApp(60);
 app.add_resource(CanvasResource, new CanvasResource(canvas))
 app.add_resource(InputResource, input_res);
 
+const SCENE_MENU_ID = app.new_scene();
+const SCENE_SETTINGS_ID = app.new_scene();
+
+const SCENE_SOLO_ID = app.new_scene();
+const SCENE_SOLO_UPGRADES_ID = app.new_scene();
+const SCENE_SOLO_GAME_OVER_ID = app.new_scene();
+
 const dog_img = document.getElementById("dog0_img");
 const cat0_img = document.getElementById("cat0_img");
 const cat_food = document.getElementById("cat_food");
@@ -33,46 +40,19 @@ class StartSystem extends System {
         this.needs_entities = false;
     }
     run_system(commands, resources, matched_entities) {
-        commands.spawn(dog_components).get_comp(Transform).x = 100;
-        commands.spawn(dog_components).get_comp(Transform).x = 220;
-        commands.spawn(dog_components);
-        commands.spawn(dog_components).get_comp(Transform).x = 340;
-        commands.spawn(dog_components).get_comp(Transform).x = 460;
+        commands.set_scene(SCENE_MENU_ID);
 
-        commands.spawn(cat_components, new Player);
-    }
-}
-class Player extends Component {}
-class PlayerMovement extends System {
-    constructor() {
-        super();
+        commands.spawn(new Transform(10, 100), new UIText("Macs Attack!", 50));
 
-        this.required_components = [Player, Transform];
-        this.on_event = Update;
-    }
-
-    run_system(commands, resources, matched_entities) {
-        const input_res = resources.get(InputResource);
-        const time = resources.get(TimeResource);
-        for (let entity of matched_entities) {
-            let pos = entity.get_comp(Transform);
-            if (input_res.is_down("a")) {
-                pos.x -= 200 * time.delta_time / 1000;
-            }
-            if (input_res.is_down("d")) {
-                pos.x += 200 * time.delta_time / 1000;
-            }
-        }
     }
 }
 
 // add systems
 app.add_system_group(new CoreSystemGroup);
 app.add_system(Startup, new StartSystem);
-app.add_system(Update, new PlayerMovement)
 
 app.run()
 
 // TODO:
-//  - GameStateManager (Resource and System)
 //  - Sound?,
+//  - Particles??
