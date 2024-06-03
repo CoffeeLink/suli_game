@@ -148,6 +148,10 @@ class EcsApp {
         for (let event of ecs.event_schedule) {
             ecs.run_systems(event);
         }
+        for (let event of ecs.event_queue) {
+            ecs.run_systems(event);
+        }
+        ecs.event_queue = [];
     }
 
     run_systems(event_type) {

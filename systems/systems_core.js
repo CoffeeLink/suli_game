@@ -172,7 +172,7 @@ class UIInteractions extends System {
             uie.selected = true;
             uie.selected_func(ent);
 
-            console.log("current selected: " + selected_uie.above.id);
+            console.debug("selected UI: " + selected_uie.above.id);
 
         } else if (input_res.is_pressed("ArrowDown") && selected_uie.under !== null) {
             selected_uie.selected = false;
@@ -183,7 +183,7 @@ class UIInteractions extends System {
             uie.selected = true;
             uie.selected_func(ent);
 
-            console.log("current selected: " + selected_uie.under.id);
+            console.debug("selected UI: " + selected_uie.under.id);
 
         } else if (input_res.is_pressed("ArrowLeft") && selected_uie.left !== null) {
             selected_uie.selected = false;
@@ -194,7 +194,7 @@ class UIInteractions extends System {
             uie.selected = true;
             uie.selected_func(ent);
 
-            console.log("current selected: " + selected_uie.left.id);
+            console.debug("selected UI: " + selected_uie.left.id);
 
         } else if (input_res.is_pressed("ArrowRight") && selected_uie.right !== null) {
             selected_uie.selected = false;
@@ -205,7 +205,7 @@ class UIInteractions extends System {
             uie.selected = true;
             uie.selected_func(ent);
 
-            console.log("current selected: " + selected_uie.right.id);
+            console.debug("selected UI: " + selected_uie.right.id);
         }
     }
 }
