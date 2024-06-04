@@ -199,9 +199,9 @@ class PlayerShooterSystem extends System {
             let pos = e.get_comp(Transform);
 
             commands.spawn(
-                new Transform(pos.x, pos.y),
+                new Transform(pos.x + 35, pos.y),
                 new Sprite2D(laser_img),
-                new Bullet(60, 0, -0.4)
+                new Bullet(60, 0, -40)
             )
             let audio = new Audio("/assets/sfx/laserShoot.wav");
             audio.play().catch();
@@ -224,8 +224,8 @@ class BulletMovement extends System {
             let bullet = e.get_comp(Bullet);
             let pos = e.get_comp(Transform);
 
-            pos.x += bullet.vx * (1000 / time.delta_time);
-            pos.y += bullet.vy * (1000 / time.delta_time);
+            pos.x += bullet.vx * (time.delta_time / 1000);
+            pos.y += bullet.vy * (time.delta_time / 1000);
 
             if (pos.y < -100) {
                 // out of screen, delete
