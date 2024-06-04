@@ -18,6 +18,7 @@ let app = new EcsApp(60);
 // add resources
 app.add_resource(CanvasResource, new CanvasResource(canvas))
 app.add_resource(InputResource, input_res);
+app.add_resource(PlayerStats, new PlayerStats);
 
 const SCENE_MENU_ID = app.new_scene();
 const SCENE_SETTINGS_ID = app.new_scene();
@@ -53,11 +54,29 @@ class StartSystem extends System {
             new UIText("New Game", 30, "yellow"),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow"
+                new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e)=> {
                 e.get_comp(UIText).color = "black"
+
             }, () => {
                 commands.queue_event(GameStartEvent)
                 commands.set_scene(SCENE_SOLO_ID);
+                // spawn player
+                commands.spawn(
+                    new Player,
+                    new Health(100),
+                    new Cannon(0, 0),
+                    player,
+                );
+
+                // spawn dog
+                commands.spawn(
+                    new Enemy(300, 0.8, 100),
+                    new Health(100),
+                    new Cannon(0, 0),
+                    dog_components,
+                );
+
             }));
         let base_uie = base_ui.get_comp(UIElement);
         base_uie.selected = true;
@@ -67,6 +86,7 @@ class StartSystem extends System {
             new UIText("Co-op",30),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow"
+                new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e) => {
                 e.get_comp(UIText).color = "black"
             }, () => {
@@ -84,6 +104,7 @@ class StartSystem extends System {
             new UIText("Options", 30),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow"
+                new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e) => {
                 e.get_comp(UIText).color = "black"
             }, () => {
@@ -101,6 +122,7 @@ class StartSystem extends System {
             new UIText("Credits", 30),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow";
+                new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e) => {
                 e.get_comp(UIText).color = "black";
             }, () => {
@@ -122,130 +144,13 @@ class StartSystem extends System {
     }
 }
 
-class GameStartSystem extends System {
-    constructor() {
-        super();
-
-        this.needs_entities = false;
-    }
-
-    run_system(commands, resources, matched_entities) {
-        // spawn player
-
-        commands.spawn(
-            new Player,
-            new Health(100),
-            player,
-        )
-
-    }
-}
-
-class PlayerMovement extends System {
-    constructor() {
-        super();
-
-        this.required_components = [Transform, Player];
-    }
-
-    run_system(commands, resources, matched_entities) {
-        let input = resources.get(InputResource);
-        let time = resources.get(TimeResource);
-
-        let speed = 200;
-        let adjust = 0;
-
-        if (input.is_down("a")) {
-            adjust -= speed * (time.delta_time / 1000); // not the most accurate in an ECS enviorment.
-        }
-        if (input.is_down("d")) {
-            adjust += speed * (time.delta_time / 1000);
-        }
-
-        for (let entity of matched_entities) {
-            let pos = entity.get_comp(Transform);
-            pos.x += adjust;
-        }
-    }
-}
-
-class PlayerShooterSystem extends System {
-    constructor() {
-        super();
-
-        this.required_components = [Player, Transform];
-
-        this.last_fired = 0;
-        this.fire_interval = 100;
-    }
-
-    run_system(commands, resources, matched_entities) {
-        let input = resources.get(InputResource);
-        let time = resources.get(TimeResource);
-
-        this.last_fired += time.delta_time;
-
-        if (this.last_fired < this.fire_interval) {
-            return;
-        }
-
-        if (!input.is_down("g")) {
-            return;
-        }
-
-        this.last_fired = 0;
-
-        for (let e of matched_entities) {
-            let pos = e.get_comp(Transform);
-
-            commands.spawn(
-                new Transform(pos.x + 35, pos.y),
-                new Sprite2D(laser_img),
-                new Bullet(60, 0, -40)
-            )
-            let audio = new Audio("/assets/sfx/laserShoot.wav");
-            audio.play().catch();
-        }
-    }
-}
-
-class BulletMovement extends System {
-    constructor() {
-        super();
-
-        this.required_components = [Bullet, Transform];
-        this.only_takes_active_scene_entities = true;
-    }
-
-    run_system(commands, resources, matched_entities) {
-        let time = resources.get(TimeResource);
-
-        for (let e of matched_entities) {
-            let bullet = e.get_comp(Bullet);
-            let pos = e.get_comp(Transform);
-
-            pos.x += bullet.vx * (time.delta_time / 1000);
-            pos.y += bullet.vy * (time.delta_time / 1000);
-
-            if (pos.y < -100) {
-                // out of screen, delete
-
-                commands.delete_entity(e);
-
-            }
-        }
-    }
-}
-
 // add systems
 app.add_system_group(new CoreSystemGroup);
 app.add_system(Startup, new StartSystem);
-app.add_system(GameStartEvent, new GameStartSystem);
 app.add_system(Update, new PlayerMovement);
-app.add_system(Update, new PlayerShooterSystem);
+app.add_system(Update, new PlayerActions);
 app.add_system(Update, new BulletMovement);
-
-
+app.add_system(Update, new EnemyActions);
 
 app.run()
 

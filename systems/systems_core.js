@@ -237,6 +237,36 @@ class TextUIRenderer extends System {
     }
 }
 
+class UiBoxRenderer extends System {
+    constructor() {
+        super();
+
+        this.required_components = [Transform, UIBox];
+        this.only_takes_active_scene_entities = true;
+
+        this.canvas_res = null;
+    }
+
+    run_system(commands, resources, matched_entities) {
+        if (this.canvas_res === null) {
+            this.canvas_res = resources.get(CanvasResource);
+        }
+
+        let ctx = this.canvas_res.context;
+        for (let entity of matched_entities) {
+            let pos = entity.get_comp(Transform);
+            let box = entity.get_comp(UIBox);
+
+            if (!box.visible) { continue; }
+
+            ctx.fillStyle = box.fill_color || "black";
+            ctx.fillRect(pos.x + box.ox, pos.y + box.oy, box.width + box.ox, box.height + box.oy);
+        }
+    }
+
+}
+
+
 // holds all systems core to the engine.
 class CoreSystemGroup extends SystemGroup {
     build(commands) {
@@ -246,6 +276,7 @@ class CoreSystemGroup extends SystemGroup {
         this.add_system(commands, Update, new UIInteractions)
         this.add_system(commands, Update, new Collider2dSystem);
         this.add_system(commands, Render, new Sprite2dRenderer);
+        this.add_system(commands, Render, new UiBoxRenderer);
         this.add_system(commands, Render, new TextUIRenderer);
     }
 }
