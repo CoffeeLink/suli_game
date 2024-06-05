@@ -52,3 +52,11 @@ class EnemyCannon extends Component {
         this.offset_y = offset_y;
     }
 }
+
+class MapWall extends Component {
+    constructor(side = false) {
+        super();
+
+        this.side = side
+    }
+}

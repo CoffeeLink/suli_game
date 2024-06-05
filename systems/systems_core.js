@@ -35,7 +35,10 @@ class Sprite2dRenderer extends System {
                 continue;
             }
 
-            canvas_resource.drawImage(rend.texture, pos.x + rend.offset_x, pos.y + rend.offset_y);
+            let new_width = (rend.texture.width * rend.scale);
+            let new_height = (rend.texture.height * rend.scale);
+
+            canvas_resource.drawImage(rend.texture, pos.x + rend.offset_x, pos.y + rend.offset_y, new_width, new_height);
         }
     }
 }

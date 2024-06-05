@@ -19,6 +19,9 @@ let app = new EcsApp(60);
 app.add_resource(CanvasResource, new CanvasResource(canvas))
 app.add_resource(InputResource, input_res);
 app.add_resource(PlayerStats, new PlayerStats);
+app.add_resource(GameState, new GameState);
+app.add_resource(Settings, new Settings);
+app.add_resource(AudioManager, new AudioManager(app.resources.get(Settings))) // silly ref :3
 
 const SCENE_MENU_ID = app.new_scene();
 const SCENE_SETTINGS_ID = app.new_scene();
@@ -29,16 +32,25 @@ const SCENE_SOLO_GAME_OVER_ID = app.new_scene();
 
 const dog_img = document.getElementById("dog0_img");
 const cat0_img = document.getElementById("cat0_img");
+
+const cat1_img = document.getElementById("cat1_img");
+
 const cat_food_img = document.getElementById("cat_food");
 const dog_food_img = document.getElementById("dog_food");
 const laser_img = document.getElementById("laser");
 
 const laser_sfx = new Audio("/assets/sfx/laserShoot.wav");
 
+const map_wall_width = 10;
+
 let dog_components = new Sprite(0, 0, dog_img, -16, -26, 0, 115, 80);
-let player = new Sprite(250, 716, cat0_img, -21, -20, 1, 104, 85);
+let player = new Sprite(250, 716, cat1_img, -21, -20, 1, 104, 85);
+
+let dog_bullet_sprite = new Sprite(0, 0, dog_food_img, -10, -13, 1, 35, 50);
 
 class GameStartEvent extends Event {}
+class WaveSpawn extends Event {}
+class UpgradeMenu extends Event {}
 
 class StartSystem extends System {
     constructor() {
@@ -47,7 +59,7 @@ class StartSystem extends System {
     }
 
     create_ui(commands) {
-        commands.spawn(new Transform(10, 100), new UIText("Macs Attack!", 50));
+        commands.spawn(new Transform(10, 100), new UIText("Macs Attack!", 50, "white"));
 
         let base_ui = commands.spawn(
             new Transform(10, 200),
@@ -56,25 +68,35 @@ class StartSystem extends System {
                 e.get_comp(UIText).color = "yellow"
                 new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e)=> {
-                e.get_comp(UIText).color = "black"
+                e.get_comp(UIText).color = "white"
 
             }, () => {
                 commands.queue_event(GameStartEvent)
                 commands.set_scene(SCENE_SOLO_ID);
+                commands.queue_event(WaveSpawn)
                 // spawn player
+
+                // PLAYER #####################<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>yy
+
                 commands.spawn(
                     new Player,
                     new Health(100),
-                    new Cannon(0, 0),
+                    new Cannon(30, -10),
                     player,
                 );
 
-                // spawn dog
+                // spawn 2 walls
+
                 commands.spawn(
-                    new Enemy(300, 0.8, 100),
-                    new Health(100),
-                    new Cannon(0, 0),
-                    dog_components,
+                    new Transform(0, 0),
+                    new Collider2D(map_wall_width, canvas.height),
+                    new MapWall,
+                );
+
+                commands.spawn(
+                    new Transform(canvas.width - map_wall_width, 0),
+                    new Collider2D(map_wall_width , canvas.height),
+                    new MapWall(true), // jobb oldal
                 );
 
             }));
@@ -83,12 +105,12 @@ class StartSystem extends System {
 
         let coop_select = commands.spawn(
             new Transform(10, 240),
-            new UIText("Co-op",30),
+            new UIText("Co-op",30, "white"),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow"
                 new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e) => {
-                e.get_comp(UIText).color = "black"
+                e.get_comp(UIText).color = "white"
             }, () => {
                 console.log("Co-op");
             })
@@ -101,12 +123,12 @@ class StartSystem extends System {
 
         let options = commands.spawn(
             new Transform(10, 280),
-            new UIText("Options", 30),
+            new UIText("Options", 30, "white"),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow"
                 new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e) => {
-                e.get_comp(UIText).color = "black"
+                e.get_comp(UIText).color = "white"
             }, () => {
                 console.log("Options")
             })
@@ -119,12 +141,12 @@ class StartSystem extends System {
 
         let credits_select = commands.spawn(
             new Transform(10, 320),
-            new UIText("Credits", 30),
+            new UIText("Credits", 30, "white"),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow";
                 new Audio("/assets/sfx/select_ui.wav").play().catch();
             }, (e) => {
-                e.get_comp(UIText).color = "black";
+                e.get_comp(UIText).color = "white";
             }, () => {
                 console.log("Credits");
             })
@@ -151,6 +173,8 @@ app.add_system(Update, new PlayerMovement);
 app.add_system(Update, new PlayerActions);
 app.add_system(Update, new BulletMovement);
 app.add_system(Update, new EnemyActions);
+app.add_system(WaveSpawn, new WaveSpawner)
+app.add_system(UpgradeMenu, new PostWaveHandler)
 
 app.run()
 
