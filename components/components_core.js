@@ -23,7 +23,7 @@ class Sprite2D extends Component {
 }
 
 class Collider2D extends Component {
-    constructor(width, height, draw = true) {
+    constructor(width, height, draw = false) {
         super();
         this.width = width;
         this.height = height;

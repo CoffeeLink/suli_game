@@ -72,3 +72,38 @@ class AudioManager extends Resource {
         sfx.play().catch();
     }
 }
+
+class EnemyDifficultyInfo extends Resource {
+    constructor() {
+        super();
+
+        // Health
+        this.health_base = 100;
+        this.health_multiplier = 1;
+        this.health_multiplier_per_wave = 0.2;
+
+        // Damage
+        this.damage_base = 30;
+        this.damage_multiplier = 1;
+        this.damage_multiplier_per_wave = 0.3;
+
+        // fire rate
+        this.firerate_base = 600;
+        this.firerate_multiplier = 1;
+        this.firerate_multiplier_per_wave = -0.05;
+        this.firerate_min = 200;
+
+        // bullet speed
+        this.bullet_speed_base = -640;
+        this.bullet_speed_multiplier = 1;
+        this.bullet_speed_multiplier_per_wave = 0.05;
+        this.bullet_speed_max = -800;
+
+        // movement_speed
+        this.speed_base = 100;
+        this.speed_base_multiplier = 1;
+        this.speed_multiplier_per_wave = 0.08;
+        this.speed_max = 300;
+
+    }
+}

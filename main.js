@@ -44,7 +44,7 @@ const laser_sfx = new Audio("/assets/sfx/laserShoot.wav");
 const map_wall_width = 10;
 
 let dog_components = new Sprite(0, 0, dog_img, -16, -26, 0, 115, 80);
-let player = new Sprite(250, 716, cat1_img, -21, -20, 1, 104, 85);
+let player = new Sprite(250, 716, cat0_img, -21, -20, 1, 104, 85);
 
 let dog_bullet_sprite = new Sprite(0, 0, dog_food_img, -10, -13, 1, 35, 50);
 
@@ -80,7 +80,7 @@ class StartSystem extends System {
 
                 commands.spawn(
                     new Player,
-                    new Health(100),
+                    new Health(10000),
                     new Cannon(30, -10),
                     player,
                 );
@@ -175,6 +175,8 @@ app.add_system(Update, new BulletMovement);
 app.add_system(Update, new EnemyActions);
 app.add_system(WaveSpawn, new WaveSpawner)
 app.add_system(UpgradeMenu, new PostWaveHandler)
+app.add_system(Update, new PlayerDamageSystem());
+
 
 app.run()
 

@@ -16,7 +16,7 @@ class PlayerMovement extends System {
             this.player_stats = resources.get(PlayerStats);
         }
 
-        let speed = this.player_stats.player_speed;
+        let speed = this.player_stats.player_speed + (100) * this.player_stats.level_speed;
         let adjust = 0;
 
         if (input.is_down("a")) {
@@ -68,9 +68,8 @@ class BulletMovement extends System {
             pos.x += bullet.vx * (time.delta_time / 1000);
             pos.y += bullet.vy * (time.delta_time / 1000);
 
-            if (pos.y < -100) {
+            if (pos.y < -100 || pos.y > 1000) {
                 // out of screen, delete
-
                 commands.delete_entity(e);
             }
         }
@@ -123,9 +122,9 @@ class PlayerActions extends System {
 
             let e = commands.spawn(
                 new Transform(pos.x + cannon.offset_x, pos.y + cannon.offset_y),
-                new Bullet(60, 0, -640),
+                new Bullet(60 + (20)*this.player_stats.level_dmg, 0, -640 + (-50)*this.player_stats.level_bullet_speed),
                 new Sprite2D(laser_img, 0, 0, 0),
-                new Collider2D(32, 32, true),
+                new Collider2D(32, 32),
             );
             e.get_comp(Transform).x = pos.x + cannon.offset_x;
             e.get_comp(Transform).y = pos.y + cannon.offset_y;
@@ -223,11 +222,15 @@ class EnemyActions extends System {
                 enemy.last_fired = 0;
             }
 
+            // delete self if out of screen by a lot somehow
+
+            if (pos.x < -100 || pos.x > 900) {
+                commands.delete_entity(e);
+                continue;
+            }
+
             // move
-
-            // change to looking for walls
-
-            let collision_state = 0;
+            // walls should have priority.
 
             for (let col_e of col.colliding_with) {
                 let wall = col_e.get_comp(MapWall);
@@ -238,17 +241,20 @@ class EnemyActions extends System {
                 }
 
                 let other_pos = col_e.get_comp(Transform);
-                if (other_pos.x > e.get_comp(Transform).x) {
-                    collision_state = 1;
-                } else if (other_pos.x < e.get_comp(Transform).x) {
-                    collision_state = 2;
-                }
-            }
 
-            if (collision_state === 1) {
-                enemy.reverse_movement = true;
-            } else if (collision_state === 2) {
-                enemy.reverse_movement = false;
+                if (other_pos.x > e.get_comp(Transform).x) {
+                    enemy.reverse_movement = true;
+                } else if (other_pos.x < e.get_comp(Transform).x) {
+                    enemy.reverse_movement = false;
+                }
+
+                if (wall) {
+                    // enemies may glitch through enough of the wall to have a bigger x than wall.x;
+
+                    enemy.reverse_movement = wall.side;
+
+                    break; // walls have top priority.
+                }
             }
 
             if (enemy.reverse_movement) {
@@ -278,20 +284,21 @@ class WaveSpawner extends System {200
         }
 
         this.game_state.enemies_remaining += 6;
+        this.game_state.difficulty_multiplier += 0.2;
 
-        this.spawn_basic_enemy(0, 0, 600, 0.9, 100, 100, 0 ,0,commands);
-        this.spawn_basic_enemy(200, 0, 600, 0.9, 100, 100, 0 ,0,commands);
-        this.spawn_basic_enemy(400, 0, 600, 0.9, 100, 100, 0 ,0,commands);
-        this.spawn_basic_enemy(600, 0, 600, 0.9, 100, 100, 0 ,0,commands);
-        this.spawn_basic_enemy(100, 150, 600, 0.9, 100, 100, 0 ,0,commands);
-        this.spawn_basic_enemy(300, 150, 600, 0.9, 100, 100, 0 ,0,commands);
+        this.spawn_basic_enemy(0, 0, 600, 0.9, 200, 100, 0 ,0,commands);
+        this.spawn_basic_enemy(200, 0, 600, 0.9, 200, 100, 0 ,0,commands);
+        this.spawn_basic_enemy(400, 0, 600, 0.9, 200, 100, 0 ,0,commands);
+        this.spawn_basic_enemy(600, 0, 600, 0.9, 200, 100, 0 ,0,commands);
+        this.spawn_basic_enemy(100, 150, 600, 0.9, 200, 100, 0 ,0,commands);
+        this.spawn_basic_enemy(300, 150, 600, 0.9, 200, 100, 0 ,0,commands);
 
         this.game_state.wave += 1;
     }
 
     spawn_basic_enemy(x, y, fire_rate, fire_chance, speed, health, c_ox, c_oy, commands) {
         let e = commands.spawn(
-            new Enemy(fire_rate, fire_chance, speed * this.game_state.difficulty_multiplier),
+            new Enemy(fire_rate, fire_chance, speed + (20) * this.game_state.difficulty_multiplier),
             new Health(health * this.game_state.difficulty_multiplier),
             new Cannon(c_ox, c_oy),
             dog_components,
@@ -349,7 +356,7 @@ class PostWaveHandler extends System {
 
         let upgrade_1 = commands.spawn(
             new Transform(100, 250),
-            new UIText("Damage (" + player_stats.level_dmg + ")", 35, "cyan"),
+            new UIText("Damage (" + player_stats.level_dmg + ")", 35, "yellow"),
             new UIElement((e) => {
                 e.get_comp(UIText).color = "yellow";
                 resources.get(AudioManager).play("/assets/sfx/select_ui.wav");
@@ -357,6 +364,8 @@ class PostWaveHandler extends System {
                 (e) => e.get_comp(UIText).color = "cyan",
                 () => {
                     // Upgrade dmg
+
+                    player_stats.level_dmg++;
 
                     postUpgrade()
             })
@@ -373,6 +382,8 @@ class PostWaveHandler extends System {
                 () => {
                     // Upgrade speed
 
+                    player_stats.level_fire_rate++
+
                     postUpgrade()
                 })
         );
@@ -387,6 +398,8 @@ class PostWaveHandler extends System {
                 (e) => e.get_comp(UIText).color = "cyan",
                 () => {
                     // Upgrade speed
+
+                    player_stats.level_bullet_speed++
 
                     postUpgrade()
                 })
@@ -403,6 +416,8 @@ class PostWaveHandler extends System {
                 () => {
                     // Upgrade dmg
 
+                    player_stats.level_health++
+
                     postUpgrade()
                 })
         )
@@ -418,6 +433,8 @@ class PostWaveHandler extends System {
                 () => {
                     // Upgrade dmg
 
+                    player_stats.level_speed++;
+
                     postUpgrade()
                 })
         )
@@ -432,6 +449,8 @@ class PostWaveHandler extends System {
                 (e) => e.get_comp(UIText).color = "cyan",
                 () => {
                     // Upgrade dmg
+
+                    player_stats.level_regen++;
 
                     postUpgrade()
                 })
@@ -473,7 +492,35 @@ class PlayerDamageSystem extends System {
     run_system(commands, resources, matched_entities) {
         for (let player of matched_entities) {
             let colider = player.get_comp(Collider2D);
+            let health = player.get_comp(Health);
 
+            for (let col_e of colider.colliding_with) {
+                if (col_e.get_comp(EnemyBullet) == null) {
+                    continue;
+                }
+
+                let bullet = col_e.get_comp(Bullet);
+
+                health.health -= bullet.damage;
+
+                resources.get(AudioManager).play("/assets/sfx/hitHurt.wav");
+
+                commands.delete_entity(col_e);
+            }
+
+            if (health.health <= 0) {
+                //dead
+                commands.set_scene(SCENE_SOLO_GAME_OVER_ID);
+
+                resources.get(AudioManager).play("/assets/sfx/synth.wav");
+
+                commands.spawn(
+                    new Transform(200, 200),
+                    new UIText("Game Over", 60, "red"),
+                    new UIBox("grey", 500, 500, -30, -60),
+                )
+
+            }
         }
     }
 }

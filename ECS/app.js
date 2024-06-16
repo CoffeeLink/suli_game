@@ -117,7 +117,10 @@ class EcsApp {
         this.add_resource(TimeResource, new TimeResource()); // Time should be core
         this.run_systems(Startup);
 
-        this.update_interval_id = setInterval(() => this.update_run(this), 1000 / this.target_frame_rate)
+        //this.update_interval_id = setInterval(() => this.update_run(this), 1000 / this.target_frame_rate)
+        requestAnimationFrame(() => {
+            this.update_run(this);
+        })
     }
 
     change_target_frame_rate(frame_rate) {
@@ -152,6 +155,10 @@ class EcsApp {
             ecs.run_systems(event);
         }
         ecs.event_queue = [];
+
+        requestAnimationFrame(() => {
+            ecs.update_run(ecs);
+        })
     }
 
     run_systems(event_type) {
